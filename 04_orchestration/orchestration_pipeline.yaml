@@ -1,0 +1,103 @@
+resources:
+  jobs:
+    orchestration_ecommerce:
+      name: orchestration_ecommerce
+      tasks:
+        - task_key: pl_ingest_bronze
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/01_bronze/nb_data_ingestion_bronze
+            source: WORKSPACE
+        - task_key: pl_transformation_silver
+          depends_on:
+            - task_key: pl_ingest_bronze
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/02_silver/nb_data_cleaning_silver
+            source: WORKSPACE
+        - task_key: pl_gold_schema_creation
+          depends_on:
+            - task_key: pl_transformation_silver
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/nb_gold_schema_creation
+            source: WORKSPACE
+        - task_key: pl_gold_dim_customer
+          depends_on:
+            - task_key: pl_gold_schema_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Dim_Table_Notebook/nb_dim_customer
+            source: WORKSPACE
+        - task_key: pl_gold_dim_date
+          depends_on:
+            - task_key: pl_gold_schema_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Dim_Table_Notebook/nb_dim_date
+            source: WORKSPACE
+        - task_key: pl_gold_dim_geography
+          depends_on:
+            - task_key: pl_gold_schema_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Dim_Table_Notebook/nb_dim_geography
+            source: WORKSPACE
+        - task_key: pl_gold_dim_products
+          depends_on:
+            - task_key: pl_gold_schema_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Dim_Table_Notebook/nb_dim_products
+            source: WORKSPACE
+        - task_key: pl_gold_dim_seller
+          depends_on:
+            - task_key: pl_gold_schema_creation
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Dim_Table_Notebook/nb_dim_sellers
+            source: WORKSPACE
+        - task_key: pl_gold_schema_creation_fact
+          depends_on:
+            - task_key: pl_gold_dim_customer
+            - task_key: pl_gold_dim_products
+            - task_key: pl_gold_dim_geography
+            - task_key: pl_gold_dim_date
+            - task_key: pl_gold_dim_seller
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/nb_gold_schema_creation
+            source: WORKSPACE
+        - task_key: pl_gold_fact_order_items
+          depends_on:
+            - task_key: pl_gold_schema_creation_fact
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Fact_Table_Notebook/nb_fact_order_items
+            source: WORKSPACE
+        - task_key: pl_gold_fact_orders
+          depends_on:
+            - task_key: pl_gold_schema_creation_fact
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Fact_Table_Notebook/nb_fact_orders
+            source: WORKSPACE
+        - task_key: pl_gold_fact_payments
+          depends_on:
+            - task_key: pl_gold_schema_creation_fact
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Fact_Table_Notebook/nb_fact_payments
+            source: WORKSPACE
+        - task_key: pl_gold_fact_reviews
+          depends_on:
+            - task_key: pl_gold_schema_creation_fact
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/Fact_Table_Notebook/nb_fact_reviews
+            source: WORKSPACE
+        - task_key: pl_curated_orders_layer
+          depends_on:
+            - task_key: pl_gold_fact_order_items
+            - task_key: pl_gold_fact_orders
+            - task_key: pl_gold_fact_payments
+            - task_key: pl_gold_fact_reviews
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/curated_table_notebook/nb_curated_table
+            source: WORKSPACE
+        - task_key: pl_kpis_layer
+          depends_on:
+            - task_key: pl_curated_orders_layer
+          notebook_task:
+            notebook_path: /Workspace/Users/bass.avinaashvenkat@gmail.com/de-mini-project-db/03_gold/kpis_notebook/nb_all_kpis
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
